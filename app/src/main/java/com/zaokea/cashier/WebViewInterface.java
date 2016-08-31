@@ -2,6 +2,7 @@ package com.zaokea.cashier;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -18,6 +19,7 @@ public class WebViewInterface {
 
     @JavascriptInterface
     public void loadUrl(String url) {
+        Log.i(getClass().getSimpleName(), "loading url: " + url);
         presentation.loadUrl(url);
     }
 }

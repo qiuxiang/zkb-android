@@ -3,6 +3,7 @@ package com.zaokea.cashier;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -28,6 +29,14 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
+
+        final Printer printer = new Printer(this);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                printer.printTestPage();
+            }
+        }, 1000);
     }
 
     @Override

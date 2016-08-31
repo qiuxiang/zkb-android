@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -18,5 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name="com.gprinter.service.GpPrintService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.gprinter.service.GpPrintService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
