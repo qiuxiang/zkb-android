@@ -1,8 +1,10 @@
 package com.zaokea.cashier;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,15 +54,28 @@ public class Printer {
         }
     }
 
+    class Receiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(getClass().getSimpleName(), "usb connected");
+            connect();
+        }
+    }
+
     Printer(Context context) {
+        this.context = context;
         PrinterServiceConnection serviceConnection = new PrinterServiceConnection();
         Intent intent = new Intent("com.gprinter.service.GpPrintService");
         intent.setPackage(context.getPackageName());
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE); // bindService
-        this.context = context;
+        IntentFilter intentFilter = new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED");
+        context.registerReceiver(new Receiver(), intentFilter);
     }
 
     public boolean connect() {
+        if (connected()) {
+            return true;
+        }
         UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         for (UsbDevice device : usbManager.getDeviceList().values()) {
             if (device.getProductId() == 1536) {
