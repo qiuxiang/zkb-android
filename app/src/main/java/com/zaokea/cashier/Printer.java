@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -26,9 +25,7 @@ import com.gprinter.command.EscCommand;
 import com.gprinter.command.GpCom;
 import com.gprinter.io.PortParameters;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.EnumMap;
@@ -38,9 +35,9 @@ import java.util.Vector;
 public class Printer {
     private GpService service;
     private Context context;
-    static final int pageSize = 384;
-    static final int printerId = 0;
-    static final int CONNECTED = 3;
+    public static final int PAGE_SIZE = 384;
+    private static final int PRINTER_ID = 0;
+    private static final int CONNECTED = 3;
 
     class PrinterServiceConnection implements ServiceConnection {
         @Override
@@ -81,7 +78,7 @@ public class Printer {
             if (device.getProductId() == 1536) {
                 int result = GpCom.ERROR_CODE.FAILED.ordinal();
                 try {
-                    result = service.openPort(printerId, PortParameters.USB, device.getDeviceName(), 0);
+                    result = service.openPort(PRINTER_ID, PortParameters.USB, device.getDeviceName(), 0);
                 } catch (RemoteException e) {
                     Log.e(getClass().getSimpleName(), "open port fail");
                 }
@@ -96,7 +93,7 @@ public class Printer {
     public boolean connected() {
         boolean status = false;
         try {
-            status = service.getPrinterConnectStatus(printerId) == CONNECTED;
+            status = service.getPrinterConnectStatus(PRINTER_ID) == CONNECTED;
         } catch (RemoteException e) {
             Log.e(getClass().getSimpleName(), "remote exception");
         }
@@ -104,56 +101,8 @@ public class Printer {
     }
 
     public boolean print(String json) {
-        EscCommand esc = new EscCommand();
-        esc.addInitializePrinter();
         try {
-            JSONArray jsonArray = new JSONArray(json);
-            for (int i = 0; i < jsonArray.length(); i += 1) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                switch (jsonObject.getString("type")) {
-                    case "text":
-                        if (jsonObject.has("align")) {
-                            switch (jsonObject.getString("align")) {
-                                case "center":
-                                    esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-                                    break;
-                                case "right":
-                                    esc.addSelectJustification(EscCommand.JUSTIFICATION.RIGHT);
-                                    break;
-                                default:
-                                    esc.addSelectJustification(EscCommand.JUSTIFICATION.LEFT);
-                            }
-                        }
-                        esc.addText(jsonObject.getString("text") + "\n");
-                        break;
-                    case "barcode":
-                        String barcode = jsonObject.getString("data");
-                        esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-                        if (jsonObject.has("height")) {
-                            esc.addSetBarcodeHeight((byte) jsonObject.getInt("height"));
-                        }
-                        if (barcode.length() > 8) {
-                            esc.addEAN13(barcode);
-                        } else {
-                            esc.addEAN8(barcode);
-                        }
-                        break;
-                    case "qrcode":
-                        int imageSize = pageSize;
-                        if (jsonObject.has("size")) {
-                            imageSize = jsonObject.getInt("size");
-                        }
-                        esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-                        esc.addRastBitImage(toQRCode(jsonObject.getString("data"), imageSize), imageSize, 0);
-                        break;
-                    case "image":
-                        byte[] bytes = Base64.decode(jsonObject.getString("data"), Base64.DEFAULT);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-                        esc.addRastBitImage(bitmap, bitmap.getWidth(), 0);
-                }
-            }
-            return print(esc);
+            return print(new PrinterCommand(json).getCommand());
         } catch (JSONException e) {
             Log.e(getClass().getSimpleName(), "json parse error");
             return false;
@@ -164,7 +113,7 @@ public class Printer {
         boolean status = false;
         try {
             status = service.sendEscCommand(
-                    printerId, toBase64(esc.getCommand())) == GpCom.ERROR_CODE.SUCCESS.ordinal();
+                    PRINTER_ID, toBase64(esc.getCommand())) == GpCom.ERROR_CODE.SUCCESS.ordinal();
         } catch (RemoteException e) {
             Log.e(getClass().getSimpleName(), "remote exception");
         }
@@ -176,11 +125,11 @@ public class Printer {
         esc.addInitializePrinter();
         esc.addText(new Date() + "\n");
         esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-        esc.addRastBitImage(toQRCode("http://bing.com", pageSize / 2), pageSize / 2, 0);
+        esc.addRastBitImage(toQRCode("http://bing.com", PAGE_SIZE / 2), PAGE_SIZE / 2, 0);
         return print(esc);
     }
 
-    private String toBase64(Vector<Byte> vector) {
+    public static String toBase64(Vector<Byte> vector) {
         byte[] bytes = new byte[vector.size()];
         for (int i = 0; i < bytes.length; i += 1) {
             bytes[i] = vector.get(i);
@@ -188,7 +137,7 @@ public class Printer {
         return Base64.encodeToString(bytes, Base64.DEFAULT);
     }
 
-    private Bitmap toQRCode(String content, int size) {
+    public static Bitmap toQRCode(String content, int size) {
         Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
         hints.put(EncodeHintType.MARGIN, 0);
         QRCodeWriter writer = new QRCodeWriter();
@@ -196,7 +145,7 @@ public class Printer {
         try {
             matrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size, hints);
         } catch (WriterException e) {
-            Log.e(getClass().getSimpleName(), "QRCodeWriter encode error");
+            Log.e(Printer.class.getSimpleName(), "QRCodeWriter encode error");
             return null;
         }
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565);
