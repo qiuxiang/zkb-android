@@ -3,8 +3,6 @@ package com.zaokea.cashier;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 
 public class WebViewInterface {
@@ -13,11 +11,13 @@ public class WebViewInterface {
 
     WebViewInterface(Context context) {
         printer = new Printer(context);
+        presentation = new WebViewPresentation(context,
+                ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplays()[1]);
+    }
 
-        Display[] displays = ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplays();
-        presentation = new WebViewPresentation(context, displays[1]);
-        presentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        presentation.show();
+    public void close() {
+        printer.close();
+        presentation.cancel();
     }
 
     @JavascriptInterface

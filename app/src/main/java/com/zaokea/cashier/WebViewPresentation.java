@@ -3,8 +3,10 @@ package com.zaokea.cashier;
 import android.annotation.SuppressLint;
 import android.app.Presentation;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -13,6 +15,8 @@ public class WebViewPresentation extends Presentation {
 
     public WebViewPresentation(Context outerContext, Display display) {
         super(outerContext, display);
+        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        show();
     }
 
     @SuppressLint("SetJavaScriptEnabled")

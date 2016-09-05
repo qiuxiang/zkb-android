@@ -24,6 +24,7 @@ import com.gprinter.aidl.GpService;
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.GpCom;
 import com.gprinter.io.PortParameters;
+import com.gprinter.service.GpPrintService;
 
 import org.json.JSONException;
 
@@ -33,6 +34,8 @@ import java.util.Map;
 import java.util.Vector;
 
 public class Printer {
+    private PrinterServiceConnection serviceConnection;
+    private Receiver receiver;
     private GpService service;
     private Context context;
     public static final int PAGE_SIZE = 384;
@@ -59,14 +62,17 @@ public class Printer {
         }
     }
 
-    Printer(Context context) {
-        this.context = context;
-        PrinterServiceConnection serviceConnection = new PrinterServiceConnection();
-        Intent intent = new Intent("com.gprinter.service.GpPrintService");
-        intent.setPackage(context.getPackageName());
-        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE); // bindService
-        IntentFilter intentFilter = new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED");
-        context.registerReceiver(new Receiver(), intentFilter);
+    Printer(Context activity) {
+        context = activity;
+        serviceConnection = new PrinterServiceConnection();
+        receiver = new Receiver();
+        activity.bindService(new Intent(context, GpPrintService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        activity.registerReceiver(receiver, new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED"));
+    }
+
+    public void close() {
+        context.unregisterReceiver(receiver);
+        context.unbindService(serviceConnection);
     }
 
     public boolean connect() {
