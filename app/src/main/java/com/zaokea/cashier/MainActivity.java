@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -22,8 +23,7 @@ public class MainActivity extends Activity {
 
         webViewInterface = new WebViewInterface(this);
         webView = (WebView) findViewById(R.id.webview);
-        webView.loadUrl("http://192.168.1.3:3000");
-        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl("http://192.168.1.7:3000");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(webViewInterface, "ZKB");
@@ -33,6 +33,10 @@ public class MainActivity extends Activity {
                 updateSystemUiVisibility();
             }
         });
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
     }
 
     @Override
