@@ -5,7 +5,7 @@ import android.hardware.display.DisplayManager;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
-public class WebViewInterface {
+class WebViewInterface {
     private WebViewPresentation presentation;
     private Printer printer;
 
@@ -15,15 +15,15 @@ public class WebViewInterface {
                 ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplays()[1]);
     }
 
-    public void close() {
+    void close() {
         printer.close();
         presentation.cancel();
     }
 
     @JavascriptInterface
-    public void loadUrl(String url) {
+    public void setClientUrl(String url) {
         Log.i(getClass().getSimpleName(), "loading url: " + url);
-        presentation.loadUrl(url);
+        presentation.setClientUrl(url);
     }
 
     @JavascriptInterface

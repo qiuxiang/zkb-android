@@ -33,16 +33,16 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Vector;
 
-public class Printer {
+class Printer {
     private PrinterServiceConnection serviceConnection;
     private Receiver receiver;
     private GpService service;
     private Context context;
-    public static final int PAGE_SIZE = 384;
     private static final int PRINTER_ID = 0;
     private static final int CONNECTED = 3;
+    static final int PAGE_SIZE = 384;
 
-    class PrinterServiceConnection implements ServiceConnection {
+    private class PrinterServiceConnection implements ServiceConnection {
         @Override
         public void onServiceDisconnected(ComponentName name) {
         }
@@ -70,12 +70,12 @@ public class Printer {
         activity.registerReceiver(receiver, new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED"));
     }
 
-    public void close() {
+    void close() {
         context.unregisterReceiver(receiver);
         context.unbindService(serviceConnection);
     }
 
-    public boolean connect() {
+    private boolean connect() {
         if (connected()) {
             return true;
         }
@@ -96,7 +96,7 @@ public class Printer {
         return false;
     }
 
-    public boolean connected() {
+    boolean connected() {
         boolean status = false;
         try {
             status = service.getPrinterConnectStatus(PRINTER_ID) == CONNECTED;
@@ -106,7 +106,7 @@ public class Printer {
         return status;
     }
 
-    public boolean print(String json) {
+    boolean print(String json) {
         try {
             return print(new PrinterCommand(json).getCommand());
         } catch (JSONException e) {
@@ -115,7 +115,7 @@ public class Printer {
         }
     }
 
-    public boolean print(EscCommand esc) {
+    private boolean print(EscCommand esc) {
         boolean status = false;
         try {
             status = service.sendEscCommand(
@@ -126,16 +126,16 @@ public class Printer {
         return status;
     }
 
-    public boolean printTestPage() {
+    boolean printTestPage() {
         EscCommand esc = new EscCommand();
         esc.addInitializePrinter();
         esc.addText(new Date() + "\n");
         esc.addSelectJustification(EscCommand.JUSTIFICATION.CENTER);
-        esc.addRastBitImage(toQRCode("http://bing.com", PAGE_SIZE / 2), PAGE_SIZE / 2, 0);
+        esc.addRastBitImage(toQRCode("http://zaokea.com", PAGE_SIZE / 2), PAGE_SIZE / 2, 0);
         return print(esc);
     }
 
-    public static String toBase64(Vector<Byte> vector) {
+    private static String toBase64(Vector<Byte> vector) {
         byte[] bytes = new byte[vector.size()];
         for (int i = 0; i < bytes.length; i += 1) {
             bytes[i] = vector.get(i);
@@ -143,7 +143,7 @@ public class Printer {
         return Base64.encodeToString(bytes, Base64.DEFAULT);
     }
 
-    public static Bitmap toQRCode(String content, int size) {
+    static Bitmap toQRCode(String content, int size) {
         Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
         hints.put(EncodeHintType.MARGIN, 0);
         QRCodeWriter writer = new QRCodeWriter();

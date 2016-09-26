@@ -10,7 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PrinterCommand {
+class PrinterCommand {
     private EscCommand esc = new EscCommand();
 
     PrinterCommand(String json) throws JSONException {
@@ -84,7 +84,7 @@ public class PrinterCommand {
         esc.addRastBitImage(bitmap, bitmap.getWidth(), 0);
     }
 
-    public EscCommand getCommand() {
+    EscCommand getCommand() {
         return esc;
     }
 }
