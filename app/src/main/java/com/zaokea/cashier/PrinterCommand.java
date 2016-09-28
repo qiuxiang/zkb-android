@@ -47,11 +47,26 @@ class PrinterCommand {
                 default:
                     esc.addSelectJustification(EscCommand.JUSTIFICATION.LEFT);
             }
+        } else {
+            esc.addSelectJustification(EscCommand.JUSTIFICATION.LEFT);
         }
     }
 
     private void handleText(JSONObject jsonObject) throws JSONException {
         handleAlign(jsonObject);
+        EscCommand.ENABLE emphasized = EscCommand.ENABLE.OFF;
+        if (jsonObject.has("emphasized") && jsonObject.getBoolean("emphasized")) {
+            emphasized = EscCommand.ENABLE.ON;
+        }
+        EscCommand.ENABLE doubleSize = EscCommand.ENABLE.OFF;
+        if (jsonObject.has("double") && jsonObject.getBoolean("double")) {
+            doubleSize = EscCommand.ENABLE.ON;
+        }
+        EscCommand.ENABLE underline = EscCommand.ENABLE.OFF;
+        if (jsonObject.has("underline") && jsonObject.getBoolean("underline")) {
+            underline = EscCommand.ENABLE.ON;
+        }
+        esc.addSelectPrintModes(EscCommand.FONT.FONTA, emphasized, doubleSize, doubleSize, underline);
         esc.addText(jsonObject.getString("text") + "\n");
     }
 

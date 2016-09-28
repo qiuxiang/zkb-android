@@ -14,7 +14,9 @@ class WebViewPresentation extends Presentation {
 
     WebViewPresentation(Context outerContext, Display display) {
         super(outerContext, display);
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (getWindow() != null) {
+            getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        }
         show();
     }
 
