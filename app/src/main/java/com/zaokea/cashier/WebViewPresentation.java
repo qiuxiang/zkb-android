@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -24,11 +25,17 @@ class WebViewPresentation extends Presentation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         webView = new WebView(getContext());
         webView.setWebViewClient(new WebViewClient());
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadData("http://192.168.1.7:3000/client.html", "text/html", "utf-8");
+        webView.loadUrl("http://192.168.1.7:3000/client");
         setContentView(webView);
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setAppCacheEnabled(true);
+        settings.setAppCachePath(getContext().getCacheDir().getAbsolutePath());
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
     }
 
     void setClientUrl(final String url) {

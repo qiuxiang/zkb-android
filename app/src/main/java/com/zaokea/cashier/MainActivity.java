@@ -37,6 +37,9 @@ public class MainActivity extends Activity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setAppCacheEnabled(true);
+        settings.setAppCachePath(this.getCacheDir().getAbsolutePath());
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
     }
 
     @Override
