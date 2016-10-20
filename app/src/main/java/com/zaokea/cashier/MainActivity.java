@@ -20,19 +20,23 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
     private WebView webView;
     private WebViewInterface webViewInterface;
-    private NetworkReceiver networkReceiver;
+    private NetworkStateReceiver networkStateReceiver;
     private ConnectivityManager connectivityManager;
 
-    class NetworkReceiver extends BroadcastReceiver {
+    private class NetworkStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) {
+            if (networkConnected()) {
                 webView.loadUrl("javascript:onConnectivityChange(true)");
             } else {
                 webView.loadUrl("javascript:onConnectivityChange(false)");
             }
         }
+    }
+
+    private boolean networkConnected() {
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -54,24 +58,27 @@ public class MainActivity extends Activity {
             }
         });
 
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkStateReceiver = new NetworkStateReceiver();
+        registerReceiver(networkStateReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(this.getCacheDir().getAbsolutePath());
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-
-        connectivityManager =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        networkReceiver = new NetworkReceiver();
-        registerReceiver(networkReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        if (networkConnected()) {
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        } else {
+            settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         webViewInterface.close();
-        unregisterReceiver(networkReceiver);
+        unregisterReceiver(networkStateReceiver);
     }
 
     @Override

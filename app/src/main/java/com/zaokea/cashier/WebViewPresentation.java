@@ -13,8 +13,8 @@ import android.webkit.WebViewClient;
 class WebViewPresentation extends Presentation {
     private WebView webView;
 
-    WebViewPresentation(Context outerContext, Display display) {
-        super(outerContext, display);
+    WebViewPresentation(Context context, Display display) {
+        super(context, display);
         if (getWindow() != null) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         }
