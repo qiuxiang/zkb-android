@@ -28,14 +28,14 @@ class WebViewPresentation extends Presentation {
 
         webView = new WebView(getContext());
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("http://192.168.1.7:3000/client");
+        webView.loadData("", "text/html", "utf-8");
         setContentView(webView);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(getContext().getCacheDir().getAbsolutePath());
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
     }
 
     void setClientUrl(final String url) {

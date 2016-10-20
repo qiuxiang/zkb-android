@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
 
         webViewInterface = new WebViewInterface(this);
         webView = (WebView) findViewById(R.id.webview);
-        webView.loadUrl("http://192.168.1.7:3000");
+        webView.loadUrl("http://192.168.1.9:3000");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(webViewInterface, "ZKB");
@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(this.getCacheDir().getAbsolutePath());
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
     }
 
     @Override
