@@ -2,7 +2,13 @@ package com.zaokea.cashier;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -14,6 +20,20 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
     private WebView webView;
     private WebViewInterface webViewInterface;
+    private NetworkReceiver networkReceiver;
+    private ConnectivityManager connectivityManager;
+
+    class NetworkReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                webView.loadUrl("javascript:onConnectivityChange(true)");
+            } else {
+                webView.loadUrl("javascript:onConnectivityChange(false)");
+            }
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -26,7 +46,7 @@ public class MainActivity extends Activity {
         webView.loadUrl("http://192.168.1.9:3000");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
-        webView.addJavascriptInterface(webViewInterface, "ZKB");
+        webView.addJavascriptInterface(webViewInterface, "native");
         webView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int visibility) {
@@ -40,12 +60,18 @@ public class MainActivity extends Activity {
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(this.getCacheDir().getAbsolutePath());
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        connectivityManager =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkReceiver = new NetworkReceiver();
+        registerReceiver(networkReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         webViewInterface.close();
+        unregisterReceiver(networkReceiver);
     }
 
     @Override

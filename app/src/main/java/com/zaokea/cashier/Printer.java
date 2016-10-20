@@ -62,12 +62,12 @@ class Printer {
         }
     }
 
-    Printer(Context activity) {
-        context = activity;
+    Printer(Context context) {
+        this.context = context;
         serviceConnection = new PrinterServiceConnection();
         receiver = new Receiver();
-        activity.bindService(new Intent(context, GpPrintService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-        activity.registerReceiver(receiver, new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED"));
+        context.bindService(new Intent(context, GpPrintService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        context.registerReceiver(receiver, new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED"));
     }
 
     void close() {
