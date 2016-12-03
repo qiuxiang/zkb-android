@@ -27,7 +27,7 @@ class WebViewInterface {
 
     @JavascriptInterface
     public void setClientUrl(String url) {
-        Log.i(getClass().getSimpleName(), "loading url: " + url);
+        Log.i(getClass().getSimpleName(), "set client url: " + url);
         presentation.setClientUrl(url);
     }
 

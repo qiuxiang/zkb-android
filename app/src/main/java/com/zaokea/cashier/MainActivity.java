@@ -27,9 +27,9 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (networkConnected()) {
-                webView.loadUrl("javascript:onConnectivityChange(true)");
+                webView.loadUrl("javascript:window.onConnectivityChange && onConnectivityChange(true)");
             } else {
-                webView.loadUrl("javascript:onConnectivityChange(false)");
+                webView.loadUrl("javascript:window.onConnectivityChange && onConnectivityChange(false)");
             }
         }
     }
@@ -47,7 +47,8 @@ public class MainActivity extends Activity {
 
         webViewInterface = new WebViewInterface(this);
         webView = (WebView) findViewById(R.id.webview);
-        webView.loadUrl("http://192.168.1.9:3000");
+//        webView.loadUrl("http://webapp.zaokea.com");
+        webView.loadUrl("http://192.168.31.118:3000");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(webViewInterface, "native");
